@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 from datetime import datetime
 
-OWNER_ID = 1160642744
+OWNER_ID = 6739598575
 produk_file = "produk.json"
 saldo_file = "saldo.json"
 deposit_file = "pending_deposit.json"
@@ -61,7 +61,7 @@ async def send_main_menu(context, chat_id, user):
     total = statistik.get(str(user.id), {}).get("nominal", 0)
 
     text = (
-        f"👋 Selamat datang di *Store Ekha*!\n\n"
+        f"👋 Selamat datang di *DOTZ STORE*!\n\n"
         f"🧑 Nama: {user.full_name}\n"
         f"🆔 ID: {user.id}\n"
         f"💰 Total Saldo Kamu: Rp{s:,}\n"
@@ -243,9 +243,7 @@ async def handle_deposit_nominal(update, context): # HANDLE DEPOSIT NOMINAL
         await context.bot.send_message(
             chat_id=query.from_user.id,
             text=f"💳 Transfer *Rp{nominal + 23:,}* ke:\n"
-                 "`DANA 0812-1259-4112 A.N And**`\n"
-                 "`SEABANK 901655655990 A.N Rizky Oryza`\n"
-                 "`BANK JAGO 107616413403 A.N Rizky Oryza`\nSetelah transfer, kirim bukti ke bot ini.",
+                 "`DANA 083838277938 A.N inisial E**`/nSetelah transfer, kirim bukti ke bot ini.",
             parse_mode="Markdown",
             reply_markup=reply_keyboard
         )
@@ -501,17 +499,17 @@ async def handle_info_bot(update, context):  # HANDLE INFO BOT
     text = (
         "📖 *INFORMASI BOT*\n"
         "╽─────────────────────────────╮\n"
-        "├ 🧠 *Nama Bot*: `Store Ekha`\n"
-        "├ 👨‍💻 *Author*: [@govtrashit](https://t.me/govtrashit)\n"
+        "├ 🧠 *Nama Bot*: `DOTZ STORE`\n"
+        "├ 👨‍💻 *Author*: [@dotzbaik80](https://t.me/dotzstorereall)\n"
         "├ 🛒 *Fungsi*: Penjualan akun digital otomatis\n"
         "├ ⚙️ *Fitur*: Deposit, Pengiriman Akun, Statistik\n"
         "├ 🧰 *Teknologi*: Python, Telegram Bot API\n"
         "├ 🗓️ *Update*: 18 Juni 2025\n"
         "╰─────────────────────────────╯\n\n"
         "🌐 *Sosial Media Developer:*\n"
-        "• GitHub: [@rzzky](https://github.com/rzzky)\n"
-        "• Instagram: [@rizzkyo](https://instagram.com/rizzkyo)\n\n"
-        "💬 *Saran / kritik?* Hubungi [@govtrashit](https://t.me/govtrashit)"
+        "• GitHub: [kontol](https://github.com/kontol)\n"
+        "• Instagram: [](https://instagram.com/dotz)\n\n"
+        "💬 *Saran / kritik?* Hubungi [@dotzbaik80](https://t.me/dotzbaik80)"
     )
 
     keyboard = InlineKeyboardMarkup([
@@ -597,7 +595,7 @@ async def handle_text(update: Update, context: CallbackContext):
             )
             await update.message.reply_text(
                 f"💳 Transfer *Rp{nominal + 23:,}* ke:\n"
-                "`DANA 0812-XXXX-XXXX a.n. Store Ekha`\nSetelah transfer, kirim bukti foto transfer ke bot ini.",
+                "`DANA 083838277938 a.n. insial E `\nSetelah transfer, kirim bukti foto transfer ke bot ini.",
                 parse_mode="Markdown",
                 reply_markup=reply_keyboard
             )
@@ -689,7 +687,7 @@ async def handle_photo(update: Update, context: CallbackContext):
     await update.message.reply_text("✅ Bukti dikirim! Tunggu konfirmasi admin.")
 
 def main(): # Made With love by @govtrashit A.K.A RzkyO
-    app = Application.builder().token("CHANGE_THIS_TO_YOUR_TOKEN").build()
+    app = Application.builder().token("8241180862:AAFSYljLOrCSwCXbAhAiCu91uwWHRQuZsqI").build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
@@ -698,3 +696,6 @@ def main(): # Made With love by @govtrashit A.K.A RzkyO
 
 if __name__ == "__main__":
     main()
+
+
+
