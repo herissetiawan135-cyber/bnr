@@ -1,12 +1,10 @@
 import json, os, uuid, requests
 from datetime import datetime
 from telegram import (
-    Update, InlineKeyboardButton, InlineKeyboardMarkup,
-    InputFile, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+    Update, InlineKeyboardButton, InlineKeyboardMarkup
 )
 from telegram.ext import (
-    Application, CommandHandler, MessageHandler,
-    CallbackQueryHandler, filters, CallbackContext
+    Application, CommandHandler, CallbackQueryHandler, CallbackContext
 )
 
 # ================== CONFIG ==================
@@ -14,7 +12,7 @@ BOT_TOKEN = "8305030719:AAGSs84nrUxrf26DJ2nwB2ODHZ1F6S9t4Kg"
 OWNER_ID = 6739598575
 
 PAKASIR_API_KEY = "7qFeQIWS0inCo0DNt0X8VpGI075aRtIW"
-PAKASIR_BASE_URL = "https://api.pakasir.com"  # SESUAIKAN
+PAKASIR_BASE_URL = "https://api.pakasir.com"
 
 produk_file = "produk.json"
 saldo_file = "saldo.json"
@@ -24,15 +22,29 @@ qris_file = "qris_pending.json"
 # ============================================
 
 
-# ================== UTIL ==================
+# ================== AUTO CREATE FILE ==================
+for f in [produk_file, saldo_file, riwayat_file, statistik_file, qris_file]:
+    if not os.path.exists(f):
+        with open(f, "w", encoding="utf-8") as x:
+            x.write("{}")
+# ======================================================
+
+
+# ================== UTIL (FIX JSON ERROR) ==================
 def load_json(file):
     if not os.path.exists(file):
         return {}
-    with open(file, "r") as f:
-        return json.load(f) if f.read().strip() else {}
+    try:
+        with open(file, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            if not content:
+                return {}
+            return json.loads(content)
+    except Exception:
+        return {}
 
 def save_json(file, data):
-    with open(file, "w") as f:
+    with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 def add_riwayat(uid, tipe, ket, jumlah):
@@ -53,7 +65,7 @@ def update_statistik(uid, nominal):
     data[uid]["jumlah"] += 1
     data[uid]["nominal"] += nominal
     save_json(statistik_file, data)
-# ==========================================
+# ==========================================================
 
 
 # ================== PAKASIR ==================
@@ -77,9 +89,7 @@ def create_qris(amount, invoice_id):
     return r.json()
 
 def cek_qris(invoice_id):
-    headers = {
-        "Authorization": f"Bearer {PAKASIR_API_KEY}"
-    }
+    headers = {"Authorization": f"Bearer {PAKASIR_API_KEY}"}
     r = requests.get(
         f"{PAKASIR_BASE_URL}/payment/status/{invoice_id}",
         headers=headers,
@@ -106,9 +116,7 @@ async def send_main_menu(context, chat_id, user):
     )
 
     keyboard = [
-        [InlineKeyboardButton("📋 List Produk", callback_data="list_produk")],
-        [InlineKeyboardButton("💰 Deposit QRIS", callback_data="deposit")],
-        [InlineKeyboardButton("📖 Info Bot", callback_data="info")]
+        [InlineKeyboardButton("💰 Deposit QRIS", callback_data="deposit")]
     ]
 
     await context.bot.send_message(
@@ -129,6 +137,7 @@ async def handle_deposit(update, context):
         for n in nominals
     ]
     keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data="back")])
+
     await query.edit_message_text(
         "💰 *Pilih nominal deposit:*",
         parse_mode="Markdown",
@@ -162,7 +171,7 @@ async def handle_deposit_nominal(update, context):
         f"💳 *QRIS Deposit*\n\n"
         f"Nominal: Rp{nominal:,}\n"
         f"Invoice: `{invoice_id}`\n\n"
-        f"Scan QR di bawah lalu klik *Cek Status*",
+        f"Scan QR lalu klik *Cek Status*",
         parse_mode="Markdown",
         reply_markup=keyboard
     )
@@ -180,18 +189,20 @@ async def handle_cek_qris(update, context):
     data = qris_data.get(invoice_id)
 
     if not data:
-        await query.answer("Invoice tidak ditemukan", show_alert=True)
+        await query.answer("❌ Invoice tidak ditemukan", show_alert=True)
         return
 
     status = cek_qris(invoice_id)
 
-    if status["data"]["status"] == "PAID":
+    if status.get("data", {}).get("status") == "PAID":
         saldo = load_json(saldo_file)
         uid = str(data["user_id"])
         saldo[uid] = saldo.get(uid, 0) + data["nominal"]
         save_json(saldo_file, saldo)
 
         add_riwayat(uid, "DEPOSIT", "QRIS Pakasir", data["nominal"])
+        update_statistik(uid, data["nominal"])
+
         qris_data.pop(invoice_id)
         save_json(qris_file, qris_data)
 
@@ -199,7 +210,6 @@ async def handle_cek_qris(update, context):
             f"✅ *Deposit berhasil!*\nSaldo +Rp{data['nominal']:,}",
             parse_mode="Markdown"
         )
-        await send_main_menu(context, data["user_id"], await context.bot.get_chat(data["user_id"]))
     else:
         await query.answer("⏳ Belum dibayar", show_alert=True)
 # ============================================
@@ -229,10 +239,9 @@ def main():
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_callback))
+    print("🤖 DOTZ STORE BOT RUNNING")
     app.run_polling()
 
 
 if __name__ == "__main__":
     main()
-
-
