@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 
 # ================== CONFIG ==================
-BOT_TOKEN = "ISI_TOKEN_BOT_KAMU"
+BOT_TOKEN = "8305030719:AAGSs84nrUxrf26DJ2nwB2ODHZ1F6S9t4Kg"
 OWNER_ID = 6739598575
 
 PAKASIR_API_KEY = "7qFeQIWS0inCo0DNt0X8VpGI075aRtIW"
@@ -234,4 +234,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
