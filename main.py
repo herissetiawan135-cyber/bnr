@@ -1,11 +1,7 @@
 import json, os, uuid, requests
 from datetime import datetime
-from telegram import (
-    Update, InlineKeyboardButton, InlineKeyboardMarkup
-)
-from telegram.ext import (
-    Application, CommandHandler, CallbackQueryHandler, CallbackContext
-)
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, CallbackContext
 
 # ================== CONFIG ==================
 BOT_TOKEN = "8305030719:AAGSs84nrUxrf26DJ2nwB2ODHZ1F6S9t4Kg"
@@ -30,7 +26,7 @@ for f in [produk_file, saldo_file, riwayat_file, statistik_file, qris_file]:
 # ======================================================
 
 
-# ================== UTIL (FIX JSON ERROR) ==================
+# ================== UTIL ==================
 def load_json(file):
     if not os.path.exists(file):
         return {}
@@ -65,38 +61,44 @@ def update_statistik(uid, nominal):
     data[uid]["jumlah"] += 1
     data[uid]["nominal"] += nominal
     save_json(statistik_file, data)
-# ==========================================================
+# ==========================================
 
 
-# ================== PAKASIR ==================
+# ================== PAKASIR (ANTI CRASH) ==================
 def create_qris(amount, invoice_id):
-    headers = {
-        "Authorization": f"Bearer {PAKASIR_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "invoice_id": invoice_id,
-        "amount": amount,
-        "payment_method": "QRIS",
-        "description": f"Deposit DOTZ STORE {invoice_id}"
-    }
-    r = requests.post(
-        f"{PAKASIR_BASE_URL}/payment/create",
-        json=payload,
-        headers=headers,
-        timeout=15
-    )
-    return r.json()
+    try:
+        headers = {
+            "Authorization": f"Bearer {PAKASIR_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "invoice_id": invoice_id,
+            "amount": amount,
+            "payment_method": "QRIS",
+            "description": f"Deposit DOTZ STORE {invoice_id}"
+        }
+        r = requests.post(
+            f"{PAKASIR_BASE_URL}/payment/create",
+            json=payload,
+            headers=headers,
+            timeout=15
+        )
+        return r.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 def cek_qris(invoice_id):
-    headers = {"Authorization": f"Bearer {PAKASIR_API_KEY}"}
-    r = requests.get(
-        f"{PAKASIR_BASE_URL}/payment/status/{invoice_id}",
-        headers=headers,
-        timeout=15
-    )
-    return r.json()
-# ============================================
+    try:
+        headers = {"Authorization": f"Bearer {PAKASIR_API_KEY}"}
+        r = requests.get(
+            f"{PAKASIR_BASE_URL}/payment/status/{invoice_id}",
+            headers=headers,
+            timeout=15
+        )
+        return r.json()
+    except Exception as e:
+        return {"data": {"status": "ERROR"}, "error": str(e)}
+# =========================================================
 
 
 # ================== MENU ==================
@@ -152,7 +154,7 @@ async def handle_deposit_nominal(update, context):
     qris = create_qris(nominal, invoice_id)
 
     if not qris.get("success"):
-        await query.answer("❌ QRIS gagal dibuat", show_alert=True)
+        await query.answer("❌ Gagal membuat QRIS\nServer pembayaran bermasalah", show_alert=True)
         return
 
     qris_data = load_json(qris_file)
