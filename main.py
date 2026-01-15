@@ -13,7 +13,7 @@ from telegram.ext import (
 BOT_TOKEN = "ISI_TOKEN_BOT_KAMU"
 OWNER_ID = 6739598575
 
-PAKASIR_API_KEY = "PAKASIR_API_KEY_KAMU"
+PAKASIR_API_KEY = "7qFeQIWS0inCo0DNt0X8VpGI075aRtIW"
 PAKASIR_BASE_URL = "https://api.pakasir.com"  # SESUAIKAN
 
 produk_file = "produk.json"
@@ -234,3 +234,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
